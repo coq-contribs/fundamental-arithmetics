@@ -18,7 +18,7 @@
 
 Require Import Wf_nat.
 Require Import missing.
-Require Export List.
+Require Export List Permutation.
 
 (** we define some notions on lists such as being a permutation of *)
 
