@@ -22,6 +22,8 @@ Require Import euclide.
 Require Import power.
 Require Import Wf_nat.
 
+Unset Standard Proposition Elimination Names.
+
 (** d is a common divisor of a and b if d | a and d | b *)
 Definition is_cd (d a b : nat) := (divides a d)/\(divides b d).
 

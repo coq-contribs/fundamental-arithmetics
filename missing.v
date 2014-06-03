@@ -20,6 +20,8 @@ Require Export Arith.
 Require Export ArithRing.
 Require Export Omega.
 
+Unset Standard Proposition Elimination Names.
+
 (** We first begin with some lemmas that relates *)
 (** +, * and - that are not in the standard library *)
 Lemma mult_lemma1 : forall (n m:nat),(n <> O)->(m <> 0)->(n <= n*m).

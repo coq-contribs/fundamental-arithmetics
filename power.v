@@ -19,6 +19,8 @@
 Require Import missing.
 Require Import division.
 
+Unset Standard Proposition Elimination Names.
+
 (** definition of square *)
 Definition square (x:nat) := x*x.
 

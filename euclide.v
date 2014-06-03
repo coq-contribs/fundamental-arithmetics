@@ -20,6 +20,8 @@ Require Import missing.
 Require Import division.
 Require Import Wf_nat.
 
+Unset Standard Proposition Elimination Names.
+
 (** lemmae about divisibility *)
 Lemma divides_le : forall (a b:nat),(a<>O)->(divides a b)->(b<=a).
   intros.

@@ -29,6 +29,8 @@ Require Import gcd.
 Require Import primes.
 Require Import power.
 
+Unset Standard Proposition Elimination Names.
+
 (** now, we show the result claimed in the header *)
 Lemma sqrt_prime_irrat_aux : forall (p k a b:nat),(is_prime p)->(rel_prime p k)->(rel_prime a b)->(p*k*(square b) <> (square a)).
   intros.

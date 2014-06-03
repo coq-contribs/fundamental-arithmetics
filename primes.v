@@ -24,6 +24,8 @@ Require Import power.
 Require Import permutation.
 Require Import Wf_nat.
 
+Unset Standard Proposition Elimination Names.
+
 (** definition of a "prime number" *)
 Definition is_prime (p:nat) := (p<>1)/\(forall (d:nat),(divides p d)->(d=1)\/(d=p)).
 
