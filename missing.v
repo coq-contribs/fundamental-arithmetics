@@ -16,19 +16,149 @@
 (* Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA *)
 (* 02110-1301 USA *)
 
+Require Export ZArith.
 Require Export Arith.
 Require Export ArithRing.
 Require Export Omega.
 
 Unset Standard Proposition Elimination Names.
 
+Open Scope positive_scope.
+
+Lemma add_cresc_positive : forall (n m : positive), n <= n + m.
+Proof.
+Admitted.
+
+Lemma mult_cresc_positive : forall (n m :positive), n <= n * m.
+Proof.
+Admitted.
+
+Lemma mult_cresc_positive_gt_1 : forall (n m : positive), (m > 1) -> n < n * m.
+Proof.
+Admitted.
+
+Lemma mult_positive_l : forall (n m : positive), n = n * m -> m = 1.
+Proof.
+Admitted.
+
+Open Scope Z_scope.
+
+Lemma mult_symm_0 : forall (m : Z), m * 0 = 0.
+Proof.
+  intros m.
+  induction m.
+  + reflexivity.
+  + reflexivity.
+  + reflexivity.
+Qed.
+
+Lemma mult_comm_Z : forall (n m : Z), n * m = m * n.
+Proof.
+  intros n.
+  induction n.
+  + intros m. simpl. rewrite mult_symm_0. reflexivity.
+  + intros m. destruct m.
+    - reflexivity.
+    - simpl. rewrite Pos.mul_comm. reflexivity.
+    - simpl. rewrite Pos.mul_comm. reflexivity.
+  + intros m. destruct m.
+    - reflexivity.
+    - simpl. rewrite Pos.mul_comm. reflexivity.
+    - simpl. rewrite Pos.mul_comm. reflexivity.
+Qed. 
+
+Lemma int_mult_lemma1 : forall (n m : Z), (n > 0) -> (m > 0) -> (n <= n*m).
+Proof.
+  intros.
+  rewrite mult_comm_Z. 
+  induction m.
+  - inversion H0.
+  - destruct n.
+     + inversion H.
+     + rewrite mult_comm_Z. simpl. apply mult_cresc_positive.
+     + inversion H.
+  - inversion H0.
+Qed.
+
+Lemma int_mult_lemma2 : forall (n m : Z),(n*m = 0) -> (n=0)\/(m=0).
+Proof.  
+  intros.
+  induction n.
+  - tauto.
+  - destruct m.
+    + tauto.
+    + inversion H.
+    + inversion H.
+  - destruct m.
+    + tauto.
+    + inversion H.
+    + inversion H.
+Qed.
+
+Lemma int_mult_lemma3 : forall (n m : Z),(n > 0)->(m > 1)->(n < n*m).
+Proof.
+  intros.
+  induction n.
+  - inversion H.
+  - destruct m.
+    + inversion H0.
+    + simpl. apply mult_cresc_positive_gt_1. apply H0.
+    + inversion H0.
+  - inversion H.
+Qed.
+
+Lemma int_mult_lemma4 : forall (n m : Z), n = n*m -> n = 0 \/ m = 1.
+Proof.
+  intros n m H.
+  destruct n.
+  + tauto.
+  + right.
+    destruct m.
+    - inversion H.
+    - simpl in H. inversion H. apply mult_positive_l in H1. rewrite H1. reflexivity.
+    - inversion H.
+  + right.
+    destruct m.
+    - inversion H.
+    - simpl in H. inversion H. apply mult_positive_l in H1. rewrite H1. reflexivity.
+    - inversion H.
+Qed.
+
+Lemma mult_lemma5 : forall (n m : Z),((n * m) =1)-> ((n=1)/\(m=1)) \/ ((n=-1)/\(m=-1)).
+Proof.
+  intros n.
+  induction n.
+  + intros m H. inversion H.
+  + left.
+    split.
+    - destruct m.
+      * inversion H.
+      * simpl in H. 
+        inversion H. 
+        apply Pos.mul_eq_1_r in H1.
+        rewrite H1.
+        symmetry. 
+        rewrite Pos.mul_comm. 
+        rewrite Pos.mul_1_l.
+        reflexivity.
+      * inversion H.
+    - destruct m.
+      * inversion H.
+      * simpl in H. inversion H.
+Admitted.
+
+Open Scope nat_scope.
 (** We first begin with some lemmas that relates *)
 (** +, * and - that are not in the standard library *)
 Lemma mult_lemma1 : forall (n m:nat),(n <> O)->(m <> 0)->(n <= n*m).
+Proof.
   intros.
   rewrite mult_comm.
-  induction m;simpl;auto with arith.
-  elim H0;trivial.
+  induction m;simpl.
+  elim H0. trivial.
+  destruct n.
+  simpl. elim H. trivial.
+  simpl. auto with arith.
 Qed.
 
 Lemma mult_lemma2 : forall (n m:nat),(n*m = O)->(n=O)\/(m=O).
