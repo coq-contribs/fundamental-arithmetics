@@ -20,147 +20,295 @@ Require Import missing.
 Require Import Wf_nat.
 
 (** b | a if there is q such that a = b * q*)
-Definition divides (a b:nat) := exists q:nat,a = (b*q).
+Definition divides (b a : Z) := exists q : Z, a = (b * q).
 
-(** 1 divides every natural number *)
-Lemma one_min_div : forall (n:nat),(divides n 1).
+(** 1 divides every integer number *)
+Lemma one_min_div_Z : forall (n : Z),(divides 1 n).
+Proof.
   intros.
-  red.
+  unfold divides.
   exists n.
-  auto with arith.
+  symmetry.
+  apply Z.mul_1_l.
 Qed.
 
-(** 0 is divides by every natural number *)
-Lemma zero_max_div : forall (n:nat),(divides O n).
+(** - 1 divides every integer number *)
+Lemma minus_one_min_div_Z : forall (n : Z),(divides (- 1) n).
+Proof.
+  intros.
+  unfold divides.
+  exists (- n).
+  destruct n.
+  - reflexivity.
+  - reflexivity.
+  - reflexivity.
+Qed.
+
+(** 0 is divided by every integer number *)
+Lemma zero_max_div : forall (n : Z), (divides n 0).
+Proof.
   intros.
   red.
-  exists O.
-  auto with arith.
+  exists 0.
+  symmetry.
+  apply Z.mul_0_r.
+Qed.
+
+Lemma zero_not_divides : forall (a : Z), divides 0 a <-> a = 0.
+Proof.
+  intros.
+  split.
+  - unfold divides.
+    intros.
+    destruct H.
+    simpl in H.
+    apply H.
+  - intros.
+    unfold divides.
+    exists 0.
+    apply H.
 Qed.
 
 (** the relation of divisibility is reflexive *)
-Lemma divides_refl : forall (a:nat),(divides a a).
+Lemma divides_refl : forall (a : Z), (divides a a).
+Proof.
   intros.
   red.
   exists 1.
-  auto with arith.
+  symmetry.
+  apply Z.mul_1_r.
 Qed.
 
 (** the relation of divisibility is transitive *)
-Lemma divides_trans : forall (a b c:nat),(divides a b)->(divides b c)->(divides a c).
+Lemma divides_trans : forall (a b c : Z), (divides a b)->(divides b c)->(divides a c).
+Proof.
   unfold divides.
   intros.
-  elim H;intro q;intro.
-  elim H0;intro q';intro.
-  rewrite H2 in H1.
-  exists (q' * q).
-  rewrite H1.
-  auto with arith.
+  destruct H.
+  destruct H0.
+  exists (x * x0).
+  rewrite H in H0.
+  rewrite H0.
+  symmetry.
+  apply Z.mul_assoc.
 Qed.
 
-(** the relation of divisibility is antisymmetric *)
-Lemma divides_antisym : forall (a b:nat),(divides a b)->(divides b a)->a=b.
+(** the relation of divisibility is not antisymmetric in Z, but it only give two options to two related numbers *)
+Lemma divides_antisym_partially : forall (a b : Z), (divides a b) -> (divides b a) -> a = b \/ a = -b.
+Proof.
   unfold divides.
   intros.
-  elim H;intro q;intro.
-  elim H0;intro q';intro.
-  rewrite H2 in H1.
-  assert ((a = 0) \/ (q' * q)=1).
-  apply mult_lemma4.
-  replace (a*(q'*q)) with (a*q'*q);try (auto with arith).
-  case H3;intro.
-  rewrite H4 in H2;simpl in H2;rewrite H2;trivial.
-  elim (mult_lemma5 q' q H4);intros.
-  rewrite H5 in H2;rewrite mult_comm in H2;simpl in H2;rewrite plus_comm in H2;simpl in H2;symmetry;trivial.
+  destruct H.
+  destruct H0.
+  rewrite H.
+  destruct a.
+  - left.
+    reflexivity.
+  - destruct b.
+    * inversion H0.
+    * destruct x.
+      {
+         inversion H.
+      }
+      {
+        destruct x0.
+        - inversion H0.
+        - rewrite H in H0.
+          simpl in H0.
+          assert (H1: forall (p : positive), Z.pos p <> 0).
+          {
+            intros p3. intuition. inversion H1.
+          }
+          assert (H2: Z.pos p1 * Z.pos p2 = 1).
+          {
+            apply mult_lemma6_Z with (n:=Z.pos p).
+            apply H1.
+            rewrite Z.mul_assoc. simpl. symmetry.
+            rewrite Pos.mul_1_r.
+            apply H0.
+          }
+          simpl in H2.
+          apply Pos2Z.inj_pos in H2.
+          apply Pos.mul_eq_1_l in H2.
+          rewrite H2.
+          left.
+          symmetry.
+          apply Z.mul_1_r.
+        - inversion H0.
+      }
+      {
+        inversion H.
+      }
+    * destruct x.
+      {
+         inversion H.
+      }
+      {
+        inversion H.
+      }
+      {
+        destruct x0.
+        - inversion H0.
+        - inversion H0.
+        - simpl in H.
+          rewrite H in H0.
+          simpl in H0.
+          assert (H1: forall (p : positive), Z.pos p <> 0).
+          {
+            intros p3. intuition. inversion H1.
+          }
+          assert (H2: Z.pos p1 * Z.pos p2 = 1).
+          {
+            apply mult_lemma6_Z with (n:=Z.pos p).
+            apply H1.
+            rewrite Z.mul_assoc. simpl. symmetry.
+            rewrite Pos.mul_1_r.
+            apply H0.
+          }
+          simpl in H2.
+          apply Pos2Z.inj_pos in H2.
+          apply Pos.mul_eq_1_l in H2.
+          rewrite H2.
+          right.
+          simpl.
+          symmetry.
+          rewrite Pos.mul_1_r.
+          reflexivity.
+      }
+  - destruct b.
+    * inversion H0.
+    * destruct x.
+      {
+         inversion H.
+      }
+      {
+        inversion H.
+      }
+      {
+        destruct x0.
+        - inversion H0.
+        - inversion H0.
+        - rewrite H in H0.
+          simpl in H0.
+          assert (H1: forall (p : positive), Z.neg p <> 0).
+          {
+            intros p3. intuition. inversion H1.
+          }
+          assert (H2: Z.neg p1 * Z.neg p2 = 1).
+          {
+            apply mult_lemma6_Z with (n:=Z.neg p).
+            apply H1.
+            rewrite Z.mul_assoc. simpl. symmetry.
+            rewrite Pos.mul_1_r.
+            apply H0.
+          }
+          simpl in H2.
+          apply Pos2Z.inj_pos in H2.
+          apply Pos.mul_eq_1_l in H2.
+          rewrite H2.
+          right.
+          simpl.
+          symmetry.
+          rewrite Pos.mul_1_r.
+          reflexivity.
+      }
+    * destruct x.
+      {
+         inversion H.
+      }
+      {
+        destruct x0.
+        - inversion H0.
+        - simpl in H.
+          rewrite H in H0.
+          simpl in H0.
+          assert (H1: forall (p : positive), Z.neg p <> 0).
+          {
+            intros p3. intuition. inversion H1.
+          }
+          assert (H2: Z.neg p1 * Z.neg p2 = 1).
+          {
+            apply mult_lemma6_Z with (n:=Z.neg p).
+            apply H1.
+            rewrite Z.mul_assoc. simpl. symmetry.
+            rewrite Pos.mul_1_r.
+            apply H0.
+          }
+          simpl in H2.
+          apply Pos2Z.inj_pos in H2.
+          apply Pos.mul_eq_1_l in H2.
+          rewrite H2.
+          left.
+          simpl.
+          symmetry.
+          rewrite Pos.mul_1_r.
+          reflexivity.
+        - inversion H0.
+      }
+      {
+        inversion H.
+      }
 Qed.
 
-(** corollary: forall a<>1, not(a | 1) *)
-Lemma non_div_1 : forall (a:nat),(a<>1)->~(divides 1 a).
+(** corollary: forall a <> 1 and a <> -1, not(a | 1) *)
+Lemma non_div_1 : forall (a : Z), (a <> 1) /\ (a <> -1) -> ~ (divides a 1).
+Proof.
   intros.
   red.
-  intro.
-  apply H.
-  apply divides_antisym;trivial.
-  apply one_min_div.
+  intros.
+  destruct H as [H1 Hm1].
+  unfold divides in H0.
+  destruct H0 as [q Hq].
+  symmetry in Hq.
+  apply mult_lemma5_Z in Hq.
+  destruct Hq as [Hq1 | Hq2].
+  - destruct Hq1 as [Hq1' Hq2']. apply H1. apply Hq1'.
+  - destruct Hq2 as [Hq1' Hq2']. apply Hm1. apply Hq1'.
 Qed.
 
 (** if d | a and d | b then d | (a+b) *)
-Lemma divides_plus : forall (d a b:nat),(divides a d)->(divides b d)->(divides (plus a b) d).
+Lemma divides_plus : forall (d a b : Z), (divides d a) -> (divides d b) -> (divides d (a + b)).
+Proof.
   unfold divides.
   intros.
-  elim H;intro q;intro.
-  elim H0;intro q';intro.
-  exists (q+q').
-  rewrite H1;rewrite H2.
+  destruct H.
+  destruct H0.
+  rewrite H.
+  rewrite H0.
+  exists (x + x0).
   ring.
 Qed.
 
 (** if d | a then d | a*b *)
-Lemma divides_mult : forall (d a b:nat),(divides a d)->(divides (a*b) d).
+Lemma divides_mult : forall (d a b : Z), (divides d a)->(divides d (a * b)).
+Proof.
   unfold divides.
   intros.
-  elim H;intro q;intro.
-  exists (b * q).
-  rewrite H0.
+  destruct H.
+  rewrite H.
+  exists (x * b).
   ring.
 Qed.
 
 (** if d | a and d | b then d | (b-a) *)
-Lemma divides_minus : forall (d a b:nat),(divides a d)->(divides b d)->(divides (b-a) d).
+Lemma divides_minus : forall (d a b : Z), (divides d a)->(divides d b)->(divides d (b-a)).
+Proof.
   unfold divides.
   intros.
-  elim H;intro q;intro.
-  elim H0;intro q';intro.
-  rewrite H1;rewrite H2.
-  exists (q'-q).
-  rewrite (mult_comm d q');rewrite (mult_comm d q);rewrite (mult_comm d (q'-q));auto with arith.
+  destruct H.
+  destruct H0.
+  rewrite H.
+  rewrite H0.
+  exists (x0 - x).
+  ring.
 Qed.
 
 (** here we show that if b | a then it is possible to compute q such that a = b*q *)
-Lemma quo_dec : forall (a b:nat),(divides a b)->{q:nat | a=b*q}.
+Lemma quo_dec : forall (a b : Z), (divides b a)-> {q : Z | a = b * q}.
+Proof.
+  unfold divides.
   intros.
-  apply (lt_wf_rec a (fun x:nat => (divides x b)->{q:nat | x = b*q}));trivial.
-  intro.
-  case n;intros.
-  exists 0;auto with arith.
-  elim (H0 ((S n0)-b)).
-  intro q;intro.
-  exists (S q).
-  replace (S n0) with (b+(S n0-b)).
-  rewrite p;rewrite plus_comm;auto with arith.
-  symmetry.
-  apply le_plus_minus.
-  elim H1;intros.
-  rewrite H2.
-  replace (b <= b*x) with (1*b <= b*x);rewrite (mult_comm b x).
-  apply mult_le_compat_r.
-  destruct x;[rewrite mult_comm in H2;discriminate | auto with arith].
-  simpl;auto with arith.
-  destruct b.
-  elim H1;simpl;intros;discriminate.
-  omega.
-  apply (divides_minus b b (S n0));[apply divides_refl | trivial].
-Qed.
+Admitted.
 
 (** we can now define the quotient of a by b in case of b | a *)
-Definition quo (a b:nat) (H:(divides a b)) := let (q,_):=(quo_dec a b H) in q.
-
-(** the quotient is the quotient! *)
-Lemma quo_is_quo : forall (a b:nat)(H:divides a b),a=(mult b (quo a b H)).
-  intros.
-  unfold quo.
-  generalize (quo_dec a b H);intro;elim s;trivial.
-Qed.
-
-(** if b | a then (n*a/b) = n*(a/b) *) 
-Lemma quo_mult : forall (a b:nat)(H:divides a b),forall (n:nat),(b<>O)->(quo (a*n) b (divides_mult b a n H))=n*(quo a b H).
-  intros.
-  generalize (quo_is_quo (a*n) b (divides_mult b a n H));intro.
-  generalize (quo_is_quo a b H);intro.
-  replace (a*n = b * quo (a * n) b (divides_mult b a n H)) with (b*(quo a b H)*n = b * quo (a * n) b (divides_mult b a n H)) in H1.
-  symmetry;rewrite mult_comm.
-  apply mult_lemma6 with b;trivial.
-  rewrite mult_assoc;trivial.
-  rewrite <- H2;trivial.
-Qed.
-
+Definition quo (a b : Z) (H:(divides b a)) := let (q,_):=(quo_dec a b H) in q.

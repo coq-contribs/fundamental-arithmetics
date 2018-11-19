@@ -67,7 +67,7 @@ Proof.
     - simpl. rewrite Pos.mul_comm. reflexivity.
 Qed. 
 
-Lemma int_mult_lemma1 : forall (n m : Z), (n > 0) -> (m > 0) -> (n <= n*m).
+Lemma mult_lemma1_Z : forall (n m : Z), (n > 0) -> (m > 0) -> (n <= n*m).
 Proof.
   intros.
   rewrite mult_comm_Z. 
@@ -80,7 +80,7 @@ Proof.
   - inversion H0.
 Qed.
 
-Lemma int_mult_lemma2 : forall (n m : Z),(n*m = 0) -> (n=0)\/(m=0).
+Lemma mult_lemma2_Z : forall (n m : Z),(n*m = 0) -> (n=0)\/(m=0).
 Proof.  
   intros.
   induction n.
@@ -95,7 +95,7 @@ Proof.
     + inversion H.
 Qed.
 
-Lemma int_mult_lemma3 : forall (n m : Z),(n > 0)->(m > 1)->(n < n*m).
+Lemma mult_lemma3_Z : forall (n m : Z),(n > 0)->(m > 1)->(n < n*m).
 Proof.
   intros.
   induction n.
@@ -107,7 +107,7 @@ Proof.
   - inversion H.
 Qed.
 
-Lemma int_mult_lemma4 : forall (n m : Z), n = n*m -> n = 0 \/ m = 1.
+Lemma mult_lemma4_Z : forall (n m : Z), n = n*m -> n = 0 \/ m = 1.
 Proof.
   intros n m H.
   destruct n.
@@ -124,7 +124,7 @@ Proof.
     - inversion H.
 Qed.
 
-Lemma mult_lemma5 : forall (n m : Z),((n * m) =1)-> ((n=1)/\(m=1)) \/ ((n=-1)/\(m=-1)).
+Lemma mult_lemma5_Z : forall (n m : Z),((n * m) =1)-> ((n=1)/\(m=1)) \/ ((n=-1)/\(m=-1)).
 Proof.
   intros n.
   induction n.
@@ -145,163 +145,228 @@ Proof.
     - destruct m.
       * inversion H.
       * simpl in H. inversion H.
-Admitted.
+        apply Pos.mul_eq_1_r in H1.
+        rewrite H.
+        rewrite H1.
+        reflexivity.
+      * simpl in H. inversion H.
+    + right. split.
+        - destruct m.
+          * inversion H.
+          * inversion H.
+          * simpl in H. inversion H. 
+            apply Pos.mul_eq_1_l in H1.
+            rewrite H1. simpl. symmetry. inversion H.
+            apply Pos.mul_eq_1_r in H2.
+            rewrite H1. simpl. reflexivity.
+        - destruct m.
+          * inversion H.
+          * inversion H.
+          * simpl in H. inversion H. 
+            apply Pos.mul_eq_1_l in H1.
+            rewrite H1. simpl. symmetry. inversion H.
+            apply Pos.mul_eq_1_r in H2. reflexivity.
+Qed.
 
-Open Scope nat_scope.
-(** We first begin with some lemmas that relates *)
-(** +, * and - that are not in the standard library *)
-Lemma mult_lemma1 : forall (n m:nat),(n <> O)->(m <> 0)->(n <= n*m).
+Lemma minus_same_number_Z : forall (y : Z), y - y = 0.
+Proof.
+  intros y.
+  destruct y.
+  + reflexivity.
+  + simpl. apply Z.pos_sub_diag.
+  + simpl. apply Z.pos_sub_diag.
+Qed.
+
+Lemma plus_minus_lemma1 : forall (y x : Z),(x+y-y=x).
 Proof.
   intros.
-  rewrite mult_comm.
-  induction m;simpl.
-  elim H0. trivial.
-  destruct n.
-  simpl. elim H. trivial.
-  simpl. auto with arith.
+  induction x.
+  + simpl. apply minus_same_number_Z.
+  + apply Z.add_simpl_r.
+  + apply Z.add_simpl_r.
 Qed.
 
-Lemma mult_lemma2 : forall (n m:nat),(n*m = O)->(n=O)\/(m=O).
+Lemma mult_minus_lemma1_Z : forall (a n : Z),a*n-n = (a-1)*n.
+Proof.
   intros.
-  induction n.
-  tauto.
-  simpl in H.
-  right.
-  assert (m <= O);try omega.
-  rewrite <- H.
-  auto with arith.
-Qed.
-
-Lemma mult_lemma3 : forall (n m:nat),(n <> O)->(m > 1)->(n < n*m).
-  intros.
-  rewrite mult_comm.
-  induction m.
-  inversion H0.
-  simpl.
-  assert (O < m*n);try omega.
-  inversion H0;try omega.
-  assert (1 <= n);try omega.
-  assert (m > 1);try omega.
-  generalize (IHm H4);omega.
-Qed.
-
-Lemma mult_lemma4 : forall (n m:nat),n=n*m -> n=O \/ m=1.
-  intros n m.
-  case n.
-  left;trivial.
-  intros.
-  right.
-  destruct m.
-  rewrite mult_comm in H.
-  discriminate.
-  destruct m;trivial.
-  assert ((S n0)<(S n0)*(S (S m))).
-  apply mult_lemma3;intros;auto with arith.
-  rewrite <- H in H0.
-  elim (lt_irrefl (S n0) H0).
-Qed.
-
-Lemma mult_lemma5 : forall (n m:nat),((n * m) =1)->(n=1)/\(m=1).
-  induction n;simpl;intros;try discriminate.
-  induction m.
-  rewrite mult_comm in H.
-  simpl in H;discriminate.
-  assert ((S n)<=((S n)*(S m))).
-  apply mult_lemma1;discriminate.
-  assert (((S n)*(S m))=((S m)+n*(S m))).
+  symmetry.
+  rewrite Z.mul_sub_distr_r.
+  assert (H: 1 * n = n).
+  {
+    destruct n.
+    + reflexivity.
+    + reflexivity.
+    + reflexivity.
+  }
+  rewrite H.
   reflexivity.
-  rewrite H1 in H0.
-  rewrite H in H0.
-  assert ((S n)=1).
-  omega.
-  split;trivial.
-  inversion H2.
-  rewrite H4 in H.
-  simpl in H.
-  omega.
 Qed.
 
-Lemma plus_minus_lemma1 : forall (y x:nat),(x+y-y=x).
-  induction y;intros;rewrite plus_comm;simpl.
-  auto with arith.
-  rewrite plus_comm.
-  apply IHy.
-Qed.
-
-Lemma mult_minus_lemma1 : forall (a n:nat),a*n-n = (a-1)*n.
+Lemma mult_lemma6_Z : forall (a b n : Z),(n <> 0)->(n*a=n*b)->(a=b).
+Proof.
   intros.
   induction a.
-  simpl.
-  trivial.
-  replace (S a*n) with (n+a*n);try (auto with arith).
-  rewrite plus_comm.
-  rewrite plus_minus_lemma1.
-  simpl.
-  rewrite <- minus_n_O;trivial.
+  - destruct b.
+    + reflexivity.
+    + rewrite mult_symm_0 in H0.
+      symmetry in H0.
+      apply mult_lemma2_Z in H0. 
+      destruct H0 as [Hn | Hz].
+        * unfold not in H. apply H in Hn. inversion Hn.
+        * inversion Hz.
+    + rewrite mult_symm_0 in H0.
+      symmetry in H0.
+      apply mult_lemma2_Z in H0. 
+      destruct H0 as [Hn | Hz].
+        * unfold not in H. apply H in Hn. inversion Hn.
+        * inversion Hz.
+  - destruct b.
+    + rewrite mult_symm_0 in H0.
+      apply mult_lemma2_Z in H0. 
+      destruct H0 as [Hn | Hz].
+        * unfold not in H. apply H in Hn. inversion Hn.
+        * inversion Hz.
+    + destruct n.
+      * rewrite Z.mul_0_l in H0.
+        symmetry in H0.
+        rewrite Z.mul_0_l in H0.
+        unfold not in H.
+        apply H in H0.
+        inversion H0.
+      * simpl in H0.
+        inversion H0.
+        apply Pos.mul_reg_l in H2.
+        apply Zpos_eq in H2.
+        apply H2.
+      * simpl in H0.
+        inversion H0.
+        apply Pos.mul_reg_l in H2.
+        apply Zpos_eq in H2.
+        apply H2.
+    + destruct n.
+      * rewrite Z.mul_0_l in H0.
+        symmetry in H0.
+        rewrite Z.mul_0_l in H0.
+        unfold not in H.
+        apply H in H0.
+        inversion H0.
+      * simpl in H0.
+        inversion H0.
+      * simpl in H0.
+        inversion H0.
+  - destruct b.
+    + rewrite mult_symm_0 in H0.
+      apply mult_lemma2_Z in H0. 
+      destruct H0 as [Hn | Hz].
+        * unfold not in H. apply H in Hn. inversion Hn.
+        * inversion Hz.
+    + destruct n.
+      * rewrite Z.mul_0_l in H0.
+        symmetry in H0.
+        rewrite Z.mul_0_l in H0.
+        unfold not in H.
+        apply H in H0.
+        inversion H0.
+      * simpl in H0.
+        inversion H0.
+      * simpl in H0.
+        inversion H0.
+    + destruct n.
+      * rewrite Z.mul_0_l in H0.
+        symmetry in H0.
+        rewrite Z.mul_0_l in H0.
+        unfold not in H.
+        apply H in H0.
+        inversion H0.
+      * simpl in H0.
+        inversion H0.
+        apply Pos.mul_reg_l in H2.
+        apply Pos2Z.inj_neg_iff in H2.
+        apply H2.
+      * simpl in H0.
+        inversion H0.
+        apply Pos.mul_reg_l in H2.
+        apply Pos2Z.inj_neg_iff in H2.
+        apply H2.
 Qed.
 
-Lemma mult_lemma6 : forall (a b n:nat),(n <> O)->(n*a=n*b)->(a=b).
-  induction a.
-  intros;rewrite <- mult_n_O in H0; generalize (mult_lemma2 n b); intros Hl2; elim Hl2; intros; (auto || elim H ; auto).
-  intros b n H.
-  rewrite mult_comm;simpl;rewrite mult_comm;intro.
-  assert (n*a = n*b-n).
-  apply plus_minus;auto.
-  assert (a*n=(b-1)*n).
-  rewrite <- mult_minus_lemma1;rewrite mult_comm;rewrite (mult_comm b n);trivial.
-  assert (a=(b-1)).
-  apply (IHa (b-1) n);trivial.
-  rewrite mult_comm;rewrite (mult_comm n (b-1));trivial.
-  destruct b;simpl in H3.
-  rewrite H3 in H0;rewrite (mult_comm n 0) in H0;rewrite plus_comm in H0;simpl in H0;elim H;trivial.
-  rewrite <- minus_n_O in H3;auto.
+Lemma minus_distributive_Z : forall (x y z : Z), - x - y = - (x + y).
+Proof.
+  intros.
+  destruct x.
+  + simpl. reflexivity.
+  + destruct y.
+    * simpl. reflexivity.
+    * simpl. reflexivity.
+    * simpl. symmetry. apply Z.pos_sub_opp.
+  + destruct y.
+    * simpl. reflexivity.
+    * simpl. symmetry. apply Z.pos_sub_opp.
+    * simpl. reflexivity.
 Qed.
 
-Lemma mult_lemma7 : forall (x y z t:nat),x*y*(z*t)=z*(x*y*t).
+Lemma minus_minus_lemma2_Z : forall (x y z : Z), (x - y - z)=(x - (y + z)).
+Proof.  
+  intros.
+  induction x.
+  - simpl. destruct y.
+    + simpl. reflexivity.
+    + destruct z.
+      * simpl. reflexivity.
+      * simpl. reflexivity.
+      * simpl. symmetry. apply Z.pos_sub_opp.
+    + destruct z.
+      * simpl. reflexivity.
+      * simpl. symmetry. apply Z.pos_sub_opp.
+      * simpl. reflexivity.
+  - destruct y.
+    + simpl. reflexivity.
+    + destruct z.
+      * simpl. rewrite Z.sub_0_r. reflexivity.
+      * symmetry. apply Z.sub_add_distr.
+      * symmetry. apply Z.sub_add_distr.
+    + destruct z.
+      * simpl. reflexivity.
+      * symmetry. apply Z.sub_add_distr.
+      * symmetry. apply Z.sub_add_distr.
+  - destruct y.
+    + reflexivity.
+    + destruct z.
+      * simpl. reflexivity.
+      * simpl. apply Pos2Z.inj_neg_iff.
+        symmetry.
+        apply Pos.add_assoc.
+      * symmetry. apply Z.sub_add_distr.
+    + destruct z.
+      * simpl. rewrite Z.sub_0_r. reflexivity.
+      * symmetry. apply Z.sub_add_distr.
+      * symmetry. apply Z.sub_add_distr.
+Qed.
+
+Lemma mult_lemma7_Z : forall (x y z t : Z), x * y * (z * t) = z * (x * y * t).
+Proof.
   intros.
   ring.
 Qed.
 
-Lemma minus_lemma1 : forall (a b:nat),(S a-S b)<S a.
+Lemma minus_lt_lemma1 : forall (b a : Z),(a < b) -> (0 < b - a).
+Proof.
   intros.
   omega.
 Qed.
 
-Lemma minus_lemma2 : forall (n m:nat),(n<=m)->(n-m=O).
+Lemma different_from_zero_pos : forall (p : positive), Z.pos p <> 0.
+Proof.
   intros.
-  omega.
+  unfold not.
+  intros H.
+  inversion H.
 Qed.
 
-Lemma mult_minus_lemma2 : forall (x y z:nat),(x*(y-z))=(x*y-x*z).
+Lemma different_from_zero_neg : forall (p : positive), Z.neg p <> 0.
+Proof.
   intros.
-  case (le_lt_dec y z);intro.
-  rewrite (minus_lemma2 y z l);rewrite mult_comm;simpl;rewrite minus_lemma2;trivial;auto with arith.
-  assert (y=z+(y-z)).
-  rewrite <- (le_plus_minus z y);try (auto with arith).
-  replace (x*y) with (x*(z+(y-z))).
-  rewrite mult_plus_distr_l;rewrite minus_plus;trivial.
-  rewrite <- H;trivial.
-Qed.
-
-Lemma plus_minus_lemma2 : forall (x y z:nat),(y<=x)->(x-y+z)=(x+z-y).
-  intros.
-  rewrite (le_plus_minus y x);try (auto with arith).
-  rewrite minus_plus;rewrite <- plus_assoc;rewrite minus_plus;trivial.
-Qed.
-
-Lemma minus_minus_lemma1 : forall (x y z:nat),(z<=y)->(x-(y-z))=(x+z-y).
-  intros.
-  rewrite (le_plus_minus z y);trivial.
-  rewrite minus_plus;rewrite plus_comm;rewrite <- minus_plus_simpl_l_reverse;trivial.
-Qed.
-
-Lemma minus_minus_lemma2 : forall (x y z:nat),(x-y-z)=(x-(y+z)).
-  induction x;simpl;trivial.
-  intros.
-  case y;simpl;trivial.
-Qed.
-
-Lemma minus_lt_lemma1 : forall (b a:nat),(a<b)->(0<b-a).
-  intros.
-  omega.
+  unfold not.
+  intros H.
+  inversion H.
 Qed.
