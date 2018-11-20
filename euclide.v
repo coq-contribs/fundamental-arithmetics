@@ -22,22 +22,94 @@ Require Import Wf_nat.
 
 Unset Standard Proposition Elimination Names.
 
-(** lemmae about divisibility *)
-Lemma divides_le : forall (a b:nat),(a<>O)->(divides a b)->(b<=a).
+Open Scope positive_scope.
+
+Lemma greater_multiplication: forall (p p1 : positive), p <= p * p1.
+Proof.
+Admitted.
+
+Open Scope Z_scope.
+
+(** lemma about divisibility *)
+Lemma divides_le : forall (a b : Z), (a<>0) -> (divides b a) -> (Z.abs b <= Z.abs a).
+Proof.
   intros.
-  elim H0;intro q;intro.
-  replace b with (b*1);try ring.
-  rewrite H1.
-  apply mult_le_compat;try omega.
-  destruct q;omega.
+  destruct H0.
+  destruct b.
+  - destruct a.
+    + intuition.
+    + intuition.
+    + intuition.
+  - destruct a.
+    + intuition.
+    + simpl.
+      destruct x.
+      * intuition.
+      * simpl in H0.
+        rewrite H0.
+        apply greater_multiplication.
+      * inversion H0.
+    + simpl.
+      destruct x.
+      * intuition.
+      * simpl in H0.
+        inversion H0.
+      * simpl in H0.
+        apply Pos2Z.inj_neg in H0.
+        rewrite H0.
+        apply greater_multiplication.
+   - destruct a.
+    + intuition.
+    + simpl.
+      destruct x.
+      * intuition.
+      * inversion H0.
+      * rewrite H0.
+        apply greater_multiplication.
+    + simpl.
+      destruct x.
+      * intuition.
+      * simpl in H0.
+        apply Pos2Z.inj_neg in H0.
+        rewrite H0.
+        apply greater_multiplication.
+      * inversion H0. 
 Qed.
+
+Open Scope nat_scope.
 
 (** Euclide theorem (existence) *)
 Theorem euclide : forall (a b:nat),(b<>O)->{q:nat & { r:nat | (a=b*q+r) /\ (r < b)}}.
+Proof.
   intros.
   apply (lt_wf_rec a (fun a:nat =>{q : nat &  {r : nat | a = b * q + r /\ r < b}})).
   intros.
-  case (le_lt_dec b n);intro.
+  case (le_lt_dec b n).
+  intro.
+  elim (H0 (n-b)).
+  intro q;intro.
+  elim p;intro r;intro.
+  exists (q+1);exists r.
+  split;try tauto.
+  rewrite (le_plus_minus b n);trivial.
+  elim p0;intros.
+  rewrite H1;ring.
+  omega.
+  exists 0;exists n.
+  split;try tauto.
+  ring.
+Qed.
+
+Open Scope Z_scope.
+
+(** Euclide theorem (existence) *)
+Theorem euclide : forall (a b : Z), (b <> O) -> {q : Z & { r : Z | (a = b*q + r) /\ (Z.abs r < Z.abs b)}}.
+Proof.
+  intros.
+  apply (lt_wf_rec a (fun a:nat =>{q : nat &  {r : nat | a = b * q + r /\ r < b}})).
+  intros.
+  case (le_lt_dec b n).
+  intro.
   elim (H0 (n-b)).
   intro q;intro.
   elim p;intro r;intro.

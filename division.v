@@ -301,13 +301,22 @@ Proof.
   rewrite H0.
   exists (x0 - x).
   ring.
-Qed.
+Qed.(P:nat -> S
 
 (** here we show that if b | a then it is possible to compute q such that a = b*q *)
 Lemma quo_dec : forall (a b : Z), (divides b a)-> {q : Z | a = b * q}.
 Proof.
   unfold divides.
   intros.
+  destruct a.
+  - destruct b.
+    + exists 0. reflexivity.
+    + exists 0. reflexivity.
+    + exists 0. reflexivity.
+  - destruct b.
+    + exists 0.
+      destruct H.
+      inversion H.
 Admitted.
 
 (** we can now define the quotient of a by b in case of b | a *)
