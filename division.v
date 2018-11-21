@@ -301,12 +301,104 @@ Proof.
   rewrite H0.
   exists (x0 - x).
   ring.
-Qed.(P:nat -> S
+Qed.
+
+(** uniquiness of quocient -> b | a -> exists unique q -> a = b * q *)
+Lemma quocient_uniquiness : forall (a b : Z), 
+  divides b a -> exists q : Z, a = b * q /\ exists q0 : Z, a = b * q0
+    -> q = q0.
+Proof.
+  intros.
+  unfold divides in H.
+  destruct H.
+  exists x.
+  split.
+  - apply H.
+  - exists x.
+    intros.
+    reflexivity.
+Qed.
+
+(** if a > 0 and b > 0 and b | a -> q > 0, where (a = b * q) *)
+Lemma same_signal_pos : forall (a b : Z),
+  a > 0 -> b > 0 -> divides b a -> exists q : Z, q > 0 -> a = b * q.
+Proof.
+  intros.
+  unfold divides in H1.
+  destruct H1.
+  destruct a.
+  - inversion H.
+  - destruct b.
+    + inversion H0.
+    + exists x.
+      intros.
+      destruct x.
+      * inversion H2.
+      * apply H1.
+      * inversion H2.
+    + inversion H0.
+  - destruct b.
+    + inversion H0.
+    + inversion H.
+    + inversion H0.
+Qed.
+
+(** if a < 0 and b < 0 and b | a -> q > 0, where (a = b * q) *)
+Lemma same_signal_neg : forall (a b : Z),
+  a < 0 -> b < 0 -> divides b a -> exists q : Z, q > 0 -> a = b * q.
+Proof.
+  intros.
+  unfold divides in H1.
+  destruct H1.
+  destruct a.
+  - inversion H.
+  - destruct b.
+    + inversion H0.
+    + inversion H0.
+    + exists x.
+      intros.
+      destruct x.
+      * inversion H2.
+      * apply H1.
+      * inversion H2.
+  - destruct b.
+    + inversion H0.
+    + inversion H0.
+    + exists x.
+      intros.
+      destruct x.
+      * inversion H2.
+      * apply H1.
+      * inversion H2.
+Qed.
+
+(** if a < 0 and b < 0 and b | a -> q > 0, where (a = b * q) *)
+Lemma dif_signal : forall (a b : Z),
+  (a > 0 /\ b < 0) \/ (a < 0 /\ b > 0) -> divides b a -> exists q : Z, q < 0 -> a = b * q.
+Proof.
+  intros.
+  unfold divides in H0.
+  destruct H0.
+  destruct H as [H1 | H2].
+  - destruct H1.
+    + exists x.
+      intros.
+      destruct x.
+      * inversion H2.
+      * inversion H2.
+      * apply H0.
+  - destruct H2.
+    + exists x.
+      intros.
+      destruct x.
+      * inversion H2.
+      * inversion H2.
+      * apply H0.
+Qed.
 
 (** here we show that if b | a then it is possible to compute q such that a = b*q *)
 Lemma quo_dec : forall (a b : Z), (divides b a)-> {q : Z | a = b * q}.
 Proof.
-  unfold divides.
   intros.
   destruct a.
   - destruct b.
@@ -317,6 +409,7 @@ Proof.
     + exists 0.
       destruct H.
       inversion H.
+    + unfold divides in H.
 Admitted.
 
 (** we can now define the quotient of a by b in case of b | a *)

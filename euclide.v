@@ -22,12 +22,6 @@ Require Import Wf_nat.
 
 Unset Standard Proposition Elimination Names.
 
-Open Scope positive_scope.
-
-Lemma greater_multiplication: forall (p p1 : positive), p <= p * p1.
-Proof.
-Admitted.
-
 Open Scope Z_scope.
 
 (** lemma about divisibility *)
@@ -47,7 +41,7 @@ Proof.
       * intuition.
       * simpl in H0.
         rewrite H0.
-        apply greater_multiplication.
+        apply mult_cresc_positive.
       * inversion H0.
     + simpl.
       destruct x.
@@ -57,7 +51,7 @@ Proof.
       * simpl in H0.
         apply Pos2Z.inj_neg in H0.
         rewrite H0.
-        apply greater_multiplication.
+        apply mult_cresc_positive.
    - destruct a.
     + intuition.
     + simpl.
@@ -65,14 +59,14 @@ Proof.
       * intuition.
       * inversion H0.
       * rewrite H0.
-        apply greater_multiplication.
+        apply mult_cresc_positive.
     + simpl.
       destruct x.
       * intuition.
       * simpl in H0.
         apply Pos2Z.inj_neg in H0.
         rewrite H0.
-        apply greater_multiplication.
+        apply mult_cresc_positive.
       * inversion H0. 
 Qed.
 
