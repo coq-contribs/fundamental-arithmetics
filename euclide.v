@@ -24,80 +24,62 @@ Unset Standard Proposition Elimination Names.
 
 Open Scope Z_scope.
 
-(** lemma about divisibility *)
-Lemma divides_le : forall (a b : Z), (a<>0) -> (divides b a) -> (Z.abs b <= Z.abs a).
+Lemma divides_zero_module : forall (a b : Z), divides b a /\ Z.abs a < Z.abs b -> a = 0.
 Proof.
   intros.
+  destruct H.
+  unfold divides in H.
+  destruct H.
+  - destruct a.
+    + reflexivity.
+    + destruct b.
+      * inversion H.
+      * destruct x.
+        { inversion H. }
+        {
+          rewrite H in H0.
+          simpl in H0.
+          inversion H0.
+Admitted.
+
+Lemma smaller_number_div : forall (b x x0 : Z), (0 <= x < Z.abs b) /\ (0 <= x0 < Z.abs b)
+  -> Z.abs (x - x0) < b.
+Proof.
+  intros.
+  destruct H.
+  destruct H.
   destruct H0.
-  destruct b.
-  - destruct a.
-    + intuition.
-    + intuition.
-    + intuition.
-  - destruct a.
-    + intuition.
-    + simpl.
-      destruct x.
-      * intuition.
-      * simpl in H0.
-        rewrite H0.
-        apply mult_cresc_positive.
-      * inversion H0.
-    + simpl.
-      destruct x.
-      * intuition.
-      * simpl in H0.
-        inversion H0.
-      * simpl in H0.
-        apply Pos2Z.inj_neg in H0.
-        rewrite H0.
-        apply mult_cresc_positive.
-   - destruct a.
-    + intuition.
-    + simpl.
-      destruct x.
-      * intuition.
-      * inversion H0.
-      * rewrite H0.
-        apply mult_cresc_positive.
-    + simpl.
-      destruct x.
-      * intuition.
-      * simpl in H0.
-        apply Pos2Z.inj_neg in H0.
-        rewrite H0.
-        apply mult_cresc_positive.
-      * inversion H0. 
-Qed.
+Admitted.
+
+Definition quotient (q a b : Z) := exists (r : Z), 0 <= r < Z.abs b /\ a = b * q + r.
+
+Definition remainder (r a b : Z) := exists (q : Z), a = b * q + r /\ (0 <= r < Z.abs b).
+
+Definition euclide (a b : Z) := (b <> 0) -> exists (q r : Z), quotient q a b /\ remainder r a b.
+
+Theorem quotient_uniquiness : forall (a b q q1 : Z), (quotient q a b) /\ (quotient q1 a b) -> q = q1.
+Proof.
+  intros.
+  destruct H as [H1 H2].
+  unfold quotient in H1.
+  unfold quotient in H2.
+  destruct H1.
+  destruct H2.
+  destruct H.
+  destruct H0.
+  rewrite H1 in H2.
+  rewrite Z.add_move_l in H2.
+  rewrite Z.add_sub_swap in H2.
+  rewrite <- Z.mul_sub_distr_l in H2.
+  symmetry in H2.
+  rewrite Zeq_plus_swap in H2.
+  apply smaller_number_div.
+Admitted.
 
 Open Scope nat_scope.
 
 (** Euclide theorem (existence) *)
-Theorem euclide : forall (a b:nat),(b<>O)->{q:nat & { r:nat | (a=b*q+r) /\ (r < b)}}.
-Proof.
-  intros.
-  apply (lt_wf_rec a (fun a:nat =>{q : nat &  {r : nat | a = b * q + r /\ r < b}})).
-  intros.
-  case (le_lt_dec b n).
-  intro.
-  elim (H0 (n-b)).
-  intro q;intro.
-  elim p;intro r;intro.
-  exists (q+1);exists r.
-  split;try tauto.
-  rewrite (le_plus_minus b n);trivial.
-  elim p0;intros.
-  rewrite H1;ring.
-  omega.
-  exists 0;exists n.
-  split;try tauto.
-  ring.
-Qed.
-
-Open Scope Z_scope.
-
-(** Euclide theorem (existence) *)
-Theorem euclide : forall (a b : Z), (b <> O) -> {q : Z & { r : Z | (a = b*q + r) /\ (Z.abs r < Z.abs b)}}.
+Theorem euclide_new : forall (a b : nat), (b <> O) -> {q : nat & { r : nat | (a = b*q + r) /\ (r < b)}}.
 Proof.
   intros.
   apply (lt_wf_rec a (fun a:nat =>{q : nat &  {r : nat | a = b * q + r /\ r < b}})).
