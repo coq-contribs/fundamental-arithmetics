@@ -23,23 +23,115 @@ Require Export Omega.
 
 Unset Standard Proposition Elimination Names.
 
+Open Scope nat_scope.
+Search(_ <= _ + _).
+
 Open Scope positive_scope.
 
 Lemma add_cresc_positive : forall (n m : positive), n <= n + m.
 Proof.
-Admitted.
+  intros.
+  rewrite Pos2Nat.inj_le.
+  rewrite Pos2Nat.inj_add.
+  apply le_plus_l.
+Qed.
 
-Lemma mult_cresc_positive : forall (n m :positive), n <= n * m.
-Proof.
-Admitted.
+Open Scope nat_scope.
 
-Lemma mult_cresc_positive_gt_1 : forall (n m : positive), (m > 1) -> n < n * m.
+Lemma to_nat_pos : forall (n : positive), 1 <= Pos.to_nat n.
 Proof.
-Admitted.
+  intros.
+  induction n.
+  - rewrite Pos.xI_succ_xO, Pos2Nat.inj_succ.
+    apply Peano.le_n_S, Peano.le_0_n.
+  - Search "inj_xO".
+    rewrite Pos2Nat.inj_xO. simpl.
+    apply Nat.le_trans with (m := Pos.to_nat n).
+    * apply IHn.
+    * apply Nat.le_add_r.
+  - rewrite Pos2Nat.inj_1. 
+    apply Peano.le_n_S, Peano.le_0_n.
+Qed.
 
-Lemma mult_positive_l : forall (n m : positive), n = n * m -> m = 1.
+Lemma to_nat_pos_S_n : forall (n : positive), exists m,  Pos.to_nat n = S m.
 Proof.
-Admitted.
+  intros n.
+  destruct (Pos.to_nat n) eqn:H.
+  - assert (H1: 1 <= Pos.to_nat n). {apply to_nat_pos. } rewrite H in H1. inversion H1.
+  - exists n0. reflexivity.
+Qed.
+
+Lemma mult_cresc_positive : forall (n m :positive), (n <= n * m)%positive.
+Proof.
+  intros.
+  rewrite Pos2Nat.inj_le, Pos2Nat.inj_mul.
+  assert (H1: exists n' , Pos.to_nat n = S n'). apply to_nat_pos_S_n.
+  assert (H2: exists m' , Pos.to_nat m = S m'). apply to_nat_pos_S_n.
+  inversion H1.
+  inversion H2.
+  rewrite H, H0.
+  simpl.
+  apply le_n_S.
+  rewrite <- mult_n_Sm, Nat.add_comm.
+  assert ((x * x0) + x = x + (x * x0)). {apply Nat.add_comm. } rewrite H3.
+  rewrite plus_assoc_reverse. apply le_plus_l.
+Qed.
+  
+Lemma mult_cresc_positive_gt_1 : forall (n m : positive), ((m > 1) -> n < n * m)%positive.
+Proof.
+  intros.
+  rewrite Pos2Nat.inj_lt.
+  rewrite Pos2Nat.inj_mul.
+  rewrite Pos2Nat.inj_gt in H.
+  rewrite Pos2Nat.inj_1 in H.
+  assert (H1: exists n' , Pos.to_nat n = S n'). apply to_nat_pos_S_n.
+  assert (H2: exists m' , Pos.to_nat m = S m'). apply to_nat_pos_S_n.
+  inversion H1.
+  inversion H2.
+  rewrite H0, H3.
+  rewrite H3 in H.
+  simpl. apply lt_n_S.
+  rewrite Nat.mul_comm.
+  simpl.
+  apply gt_S_n in H.
+  apply gt_le_S in H.
+  destruct x0.
+  - inversion H.
+  - simpl. apply le_lt_n_Sm. rewrite plus_comm, plus_assoc_reverse. apply le_plus_l. 
+Qed.
+
+Open Scope positive_scope.
+
+Lemma mult_positive_l : forall (n m : positive), (n = n * m -> m = 1)%positive.
+Proof.
+  intros.
+  Search( _ * ?x = ?x).
+  destruct m.
+  - 
+    apply Pos.eqb_eq in H.
+    rewrite Pos.xI_succ_xO in H. 
+    rewrite Pos.mul_succ_r in H.
+    assert (H1: n <> n + n*m~0). { apply not_eq_sym. rewrite Pos.add_comm. apply Pos.add_no_neutral. }
+    apply Pos.eqb_neq in H1.
+    rewrite H in H1. inversion H1.
+  - assert(H1: m~0 > 1). {
+      rewrite <- Pos.add_diag.
+      rewrite Pos2Nat.inj_gt.
+      rewrite Pos2Nat.inj_add.
+      rewrite Pos2Nat.inj_1.
+      assert (H2: exists m' , Pos.to_nat m = S m'). apply to_nat_pos_S_n.
+      inversion H2.
+      rewrite H0. simpl. rewrite plus_comm. simpl. auto with arith.
+    }
+    
+    assert (H2: n < n * m~0). { 
+      apply mult_cresc_positive_gt_1, H1.
+    }
+    symmetry  in H.
+    rewrite H in H2. 
+    apply Pos.lt_irrefl in H2. inversion H2.
+  - reflexivity.
+Qed.
 
 Open Scope Z_scope.
 
