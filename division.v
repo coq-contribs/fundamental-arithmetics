@@ -463,17 +463,74 @@ Qed.
 Lemma quo_dec : forall (a b : Z), (divides b a)-> {q : Z | a = b * q}.
 Proof.
   intros.
-  destruct a.
-  - destruct b.
+  induction a.
+  - induction b.
     + exists 0. reflexivity.
     + exists 0. reflexivity.
     + exists 0. reflexivity.
-  - destruct b.
+  - induction b.
     + exists 0.
       destruct H.
       inversion H.
     + unfold divides in H.
+      exists ((Z.pos p) / (Z.pos p0)).
+      inversion H. Search( _ * (_ / _) ).
+      simpl.
 Admitted.
 
 (** we can now define the quotient of a by b in case of b | a *)
 Definition quo (a b : Z) (H:(divides b a)) := let (q,_):=(quo_dec a b H) in q.
+
+Open Scope nat_scope.
+
+(** b | a if there is q such that a = b * q*)
+Definition divides_new (a b:nat) := exists q:nat,a = (b*q).
+
+(** here we show that if b | a then it is possible to compute q such that a = b*q *)
+Lemma quo_dec_new : forall (a b:nat),(divides_new a b)->{q:nat | a=b*q}.
+  intros.
+  apply (lt_wf_rec a (fun x:nat => (divides_new x b)->{q:nat | x = b*q}));trivial.
+  intro.
+  case n;intros.
+  - exists 0. auto with arith.
+  - elim (H0 ((S n0)-b)).
+  intro q;intro.
+  exists (S q).
+  replace (S n0) with (b+(S n0-b)).
+  rewrite p;rewrite plus_comm;auto with arith.
+  symmetry.
+  apply le_plus_minus.
+  elim H1;intros.
+  rewrite H2.
+  replace (b <= b*x) with (1*b <= b*x);rewrite (mult_comm b x).
+  apply mult_le_compat_r.
+  destruct x;[rewrite mult_comm in H2;discriminate | auto with arith].
+  simpl;auto with arith.
+  destruct b.
+  elim H1;simpl;intros;discriminate.
+  omega.
+  apply (divides_minus b b (S n0));[apply divides_refl | trivial].
+Qed.
+
+(** we can now define the quotient of a by b in case of b | a *)
+Definition quo (a b:nat) (H:(divides_new a b)) := let (q,_):=(quo_dec a b H) in q.
+
+(** the quotient is the quotient! *)
+Lemma quo_is_quo : forall (a b:nat)(H:divides a b),a=(mult b (quo a b H)).
+  intros.
+  unfold quo.
+  generalize (quo_dec a b H);intro;elim s;trivial.
+Qed.
+
+(** if b | a then (n*a/b) = n*(a/b) *) 
+Lemma quo_mult : forall (a b:nat)(H:divides a b),forall (n:nat),(b<>O)->(quo (a*n) b (divides_mult b a n H))=n*(quo a b H).
+  intros.
+  generalize (quo_is_quo (a*n) b (divides_mult b a n H));intro.
+  generalize (quo_is_quo a b H);intro.
+  replace (a*n = b * quo (a * n) b (divides_mult b a n H)) with (b*(quo a b H)*n = b * quo (a * n) b (divides_mult b a n H)) in H1.
+  symmetry;rewrite mult_comm.
+  apply mult_lemma6 with b;trivial.
+  rewrite mult_assoc;trivial.
+  rewrite <- H2;trivial.
+Qed.
+
