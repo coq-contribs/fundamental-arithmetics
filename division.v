@@ -396,6 +396,69 @@ Proof.
       * apply H0.
 Qed.
 
+Lemma div_comb_linear : forall (a b c : Z), (divides a b) /\ (divides a c) -> 
+  forall (x y : Z), (divides a (b * x + c * y) ).
+Proof.
+  intros.
+  destruct H.
+  destruct H.
+  destruct H0.
+  unfold divides.
+  rewrite H.
+  rewrite H0.
+  exists (x0 * x + x1 * y).
+  rewrite Z.mul_add_distr_l.
+  rewrite Zmult_assoc_reverse.
+  rewrite Zmult_assoc_reverse.
+  reflexivity.
+Qed.
+
+(** lemma about divisibility *)
+Lemma divides_le : forall (a b : Z), (a<>0) -> (divides b a) -> (Z.abs b <= Z.abs a).
+Proof.
+  intros.
+  destruct H0.
+  destruct b.
+  - destruct a.
+    + intuition.
+    + intuition.
+    + intuition.
+  - destruct a.
+    + intuition.
+    + simpl.
+      destruct x.
+      * intuition.
+      * simpl in H0.
+        rewrite H0.
+        apply mult_cresc_positive.
+      * inversion H0.
+    + simpl.
+      destruct x.
+      * intuition.
+      * simpl in H0.
+        inversion H0.
+      * simpl in H0.
+        apply Pos2Z.inj_neg in H0.
+        rewrite H0.
+        apply mult_cresc_positive.
+   - destruct a.
+    + intuition.
+    + simpl.
+      destruct x.
+      * intuition.
+      * inversion H0.
+      * rewrite H0.
+        apply mult_cresc_positive.
+    + simpl.
+      destruct x.
+      * intuition.
+      * simpl in H0.
+        apply Pos2Z.inj_neg in H0.
+        rewrite H0.
+        apply mult_cresc_positive.
+      * inversion H0. 
+Qed.
+
 (** here we show that if b | a then it is possible to compute q such that a = b*q *)
 Lemma quo_dec : forall (a b : Z), (divides b a)-> {q : Z | a = b * q}.
 Proof.
