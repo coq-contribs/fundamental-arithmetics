@@ -23,9 +23,6 @@ Require Export Omega.
 
 Unset Standard Proposition Elimination Names.
 
-Open Scope nat_scope.
-Search(_ <= _ + _).
-
 Open Scope positive_scope.
 
 Lemma add_cresc_positive : forall (n m : positive), n <= n + m.
@@ -44,8 +41,7 @@ Proof.
   induction n.
   - rewrite Pos.xI_succ_xO, Pos2Nat.inj_succ.
     apply Peano.le_n_S, Peano.le_0_n.
-  - Search "inj_xO".
-    rewrite Pos2Nat.inj_xO. simpl.
+  - rewrite Pos2Nat.inj_xO. simpl.
     apply Nat.le_trans with (m := Pos.to_nat n).
     * apply IHn.
     * apply Nat.le_add_r.
@@ -97,7 +93,7 @@ Proof.
   apply gt_le_S in H.
   destruct x0.
   - inversion H.
-  - simpl. apply le_lt_n_Sm. rewrite plus_comm, plus_assoc_reverse. apply le_plus_l. 
+  - simpl. apply le_lt_n_Sm. rewrite plus_comm, plus_assoc_reverse. apply le_plus_l.
 Qed.
 
 Open Scope positive_scope.

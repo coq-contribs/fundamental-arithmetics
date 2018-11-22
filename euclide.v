@@ -22,6 +22,16 @@ Require Import Wf_nat.
 
 Unset Standard Proposition Elimination Names.
 
+Open Scope positive_scope.
+
+Lemma never_lesser_mult_positive : forall (a b : positive), ~ (a * b < a).
+Proof.
+  intros.
+  unfold not.
+  intros.
+  Search (_ <= _ * _).
+Admitted.
+
 Open Scope Z_scope.
 
 Lemma divides_zero_module : forall (a b : Z), divides b a /\ Z.abs a < Z.abs b -> a = 0.
@@ -39,8 +49,49 @@ Proof.
         {
           rewrite H in H0.
           simpl in H0.
+          apply never_lesser_mult_positive in H0.
           inversion H0.
-Admitted.
+        }
+        {
+          inversion H.
+        }
+      * destruct x.
+        { inversion H. }
+        { inversion H. }
+        {
+           rewrite H in H0.
+           simpl in H0.
+           apply never_lesser_mult_positive in H0.
+           inversion H0.
+        }
+   + destruct b.
+     * inversion H.
+     * destruct x.
+       { inversion H. }
+       { inversion H. }
+       {
+          rewrite H in H0.
+          simpl in H0.
+          apply never_lesser_mult_positive in H0.
+          inversion H0.
+       }
+     * destruct x.
+       { inversion H. }
+       { rewrite H in H0.
+          simpl in H0.
+          apply never_lesser_mult_positive in H0.
+          inversion H0.
+       }
+       { inversion H. }
+Qed.
+
+Lemma impossible_Zneg : forall (p : positive), ~ (0 <= Z.neg p).
+Proof.
+  intros.
+  unfold not.
+  intros.
+  auto.
+Qed.
 
 Lemma smaller_number_div : forall (b x x0 : Z), (0 <= x < Z.abs b) /\ (0 <= x0 < Z.abs b)
   -> Z.abs (x - x0) < b.
@@ -49,6 +100,19 @@ Proof.
   destruct H.
   destruct H.
   destruct H0.
+  destruct b.
+  - simpl in H2.
+    intuition.
+  - simpl in H2.
+    simpl in H1.
+    destruct x.
+    + destruct x0.
+      * simpl. intuition.
+      * simpl. apply H2.
+      * simpl. apply impossible_Zneg in H0. intuition.
+    + destruct x0.
+      * simpl. apply H1.
+      * simpl.
 Admitted.
 
 Definition quotient (q a b : Z) := exists (r : Z), 0 <= r < Z.abs b /\ a = b * q + r.
@@ -73,7 +137,6 @@ Proof.
   rewrite <- Z.mul_sub_distr_l in H2.
   symmetry in H2.
   rewrite Zeq_plus_swap in H2.
-  apply smaller_number_div.
 Admitted.
 
 Open Scope nat_scope.
