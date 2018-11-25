@@ -101,7 +101,6 @@ Open Scope positive_scope.
 Lemma mult_positive_l : forall (n m : positive), (n = n * m -> m = 1)%positive.
 Proof.
   intros.
-  Search( _ * ?x = ?x).
   destruct m.
   - 
     apply Pos.eqb_eq in H.
